@@ -90,7 +90,7 @@ const App = () => {
           )}
           {searchResult ? <SearchBox onSearch={handleSearch} /> : null}
           <hr />
-          <button type="submit" className="search-button" onClick={() => handleStartAnalysis}>
+          <button type="submit" className="search-button" onClick={handleStartAnalysis}>
             Start Analysis
           </button>
         </div>
