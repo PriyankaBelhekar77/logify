@@ -6,13 +6,15 @@ const ContentComponent = ({ selectedItem }) => {
     <main className="app-content">
       {selectedItem ? (
         <div className="content-details">
-          <h2>{selectedItem.title}</h2>
-          {selectedItem.details.map((detail, index) => (
+          <h5>{selectedItem.log}</h5>
+          {Object.keys(selectedItem.analysis).map((detail, index) => {
+            return (
             <div key={index} className="content-subsection">
-              <h3>Subsection {index + 1}</h3>
-              <p>{detail}</p>
+              <h3>{detail}</h3>
+              <p>{selectedItem.analysis[detail]}</p>
             </div>
-          ))}
+          )
+          })}
         </div>
       ) : (
         <div className="content-placeholder">

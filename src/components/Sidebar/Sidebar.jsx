@@ -4,7 +4,10 @@ import "./Sidebar.css";
 const Sidebar = ({ items, selectedItem, onItemSelect }) => {
   return (
     <aside className="app-sidebar">
-      {items.map((item) => (
+      {items.map((item) => {
+        const timestampMatch = item.log.match(/^ERROR - \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}/);
+        const truncatedLog = timestampMatch ? timestampMatch[0] : ''; // Truncate at timestamp, otherwise show empty
+        return <>
         <div
           key={item.id}
           className={`sidebar-item ${
@@ -12,9 +15,11 @@ const Sidebar = ({ items, selectedItem, onItemSelect }) => {
           }`}
           onClick={() => onItemSelect(item)}
         >
-          {item.title}
+          {truncatedLog}
         </div>
-      ))}
+        </>
+      })
+    }
     </aside>
   );
 };

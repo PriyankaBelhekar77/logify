@@ -1,39 +1,62 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import Header from "./components/Header";
 import ContentComponent from "./components/Content";
 import Sidebar from "./components/Sidebar";
 import SearchBox from "./components/Search";
+import axios from "axios"; // Import axios for API requests
 
 const App = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [searchResult, setSearchResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);  // Manage loading state
+  const [pollingData, setPollingData] = useState(null);  // Store the fetched data
 
   const sidebarItems = [
     {
       id: "A",
-      title: "This is demo",
-      details: [
-        "Subsection 1 for A",
-        "Subsection 2 for A",
-        "Subsection 3 for A",
-      ],
+      log: "ERROR - 2024-09-26 07:43:22,573 - Request Id: 5755bec0-48b7-4667-8935-aed03f62bae8 Error in execution of function...",
+      analysis: {
+        error: "Missing arguments in initialization of UtkarshOperations class",
+        fix: "Make sure to provide all the required arguments...",
+        codeExample: "obj = UtkarshOperations(dbConn=value1, payload=value2, requestId=value3, consumerId=value4)"
+      }
     },
-    {
-      id: "B",
-      title: "Find my details",
-      details: [
-        "Subsection 1 for B",
-        "Subsection 2 for B",
-        "Subsection 3 for B",
-      ],
-    },
+    // Add other items
   ];
 
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://127.0.0.1:8081/poll_logs"); // Replace with your API URL
+      setPollingData(response.data); // Store the fetched data
+      setIsLoading(false);  // Stop the loader once data is fetched
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setIsLoading(false); // Stop loader on error
+    }
+  };
+
+  // Start polling API after initial render
+  useEffect(() => {
+    // Polling interval (every 30 seconds for example)
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000); // Fetch data every 30 seconds
+
+    // Stop polling after 2 minutes
+    setTimeout(() => {
+      clearInterval(interval); // Stop polling after 2 minutes (120,000 ms)
+    }, 120000); // 2 minutes
+
+    // Initial fetch when the component mounts
+    fetchData();
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+
   const handleSearch = (query) => {
-    // Mock search result
     const result = sidebarItems.find((item) =>
-      item.title.toLowerCase().includes(query.toLowerCase())
+      item.log.toLowerCase().includes(query.toLowerCase())
     );
     setSearchResult(result);
     setSelectedItem(result);
@@ -42,6 +65,10 @@ const App = () => {
   const handleSidebar = (result) => {
     setSearchResult(result);
     setSelectedItem(result);
+  };
+
+  const handleStartAnalysis = () => {
+    fetchData();
   }
 
   return (
@@ -54,12 +81,18 @@ const App = () => {
           onItemSelect={handleSidebar}
         />
         <div className="content-wrapper">
-          {searchResult ? (
+          {isLoading ? (
+            <div className="loader">Loading...</div>  // Show loader during fetching
+          ) : searchResult ? (
             <ContentComponent selectedItem={searchResult} />
           ) : (
             <SearchBox onSearch={handleSearch} />
           )}
           {searchResult ? <SearchBox onSearch={handleSearch} /> : null}
+          <hr />
+          <button type="submit" className="search-button" onClick={() => handleStartAnalysis}>
+            Start Analysis
+          </button>
         </div>
       </div>
     </div>
